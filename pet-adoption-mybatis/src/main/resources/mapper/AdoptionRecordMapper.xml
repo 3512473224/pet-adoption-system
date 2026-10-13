@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pet.mapper.AdoptionRecordMapper">
+
+    <resultMap id="RecordResultMap" type="com.pet.entity.AdoptionRecord">
+        <id column="id" property="id"/>
+        <result column="pet_id" property="petId"/>
+        <result column="adopter_id" property="adopterId"/>
+        <result column="adopt_date" property="adoptDate"/>
+        <result column="staff_name" property="staffName"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.pet.entity.AdoptionRecord"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO adoption_record (pet_id, adopter_id, adopt_date, staff_name, remark)
+        VALUES (#{petId}, #{adopterId}, #{adoptDate}, #{staffName}, #{remark})
+    </insert>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM adoption_record WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.pet.entity.AdoptionRecord">
+        UPDATE adoption_record
+        <set>
+            <if test="petId != null">pet_id = #{petId},</if>
+            <if test="adopterId != null">adopter_id = #{adopterId},</if>
+            <if test="adoptDate != null">adopt_date = #{adoptDate},</if>
+            <if test="staffName != null">staff_name = #{staffName},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" parameterType="int" resultMap="RecordResultMap">
+        SELECT id, pet_id, adopter_id, adopt_date, staff_name, remark
+        FROM adoption_record WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="RecordResultMap">
+        SELECT id, pet_id, adopter_id, adopt_date, staff_name, remark
+        FROM adoption_record ORDER BY id
+    </select>
+
+    <select id="selectByAdopterId" parameterType="int" resultMap="RecordResultMap">
+        SELECT id, pet_id, adopter_id, adopt_date, staff_name, remark
+        FROM adoption_record WHERE adopter_id = #{adopterId} ORDER BY id
+    </select>
+
+    <select id="selectByPetId" parameterType="int" resultMap="RecordResultMap">
+        SELECT id, pet_id, adopter_id, adopt_date, staff_name, remark
+        FROM adoption_record WHERE pet_id = #{petId} ORDER BY id
+    </select>
+
+</mapper>

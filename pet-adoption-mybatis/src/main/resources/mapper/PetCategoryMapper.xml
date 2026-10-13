@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pet.mapper.PetCategoryMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="CategoryResultMap" type="com.pet.entity.PetCategory">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <!-- 一对多：一查品类时顺带查出该品类下所有宠物 -->
+    <resultMap id="CategoryWithPetsMap" type="com.pet.entity.PetCategory" extends="CategoryResultMap">
+        <collection property="pets" ofType="com.pet.entity.Pet">
+            <id column="p_id" property="id"/>
+            <result column="p_name" property="name"/>
+            <result column="p_category_id" property="categoryId"/>
+            <result column="p_breed" property="breed"/>
+            <result column="p_age" property="age"/>
+            <result column="p_gender" property="gender"/>
+            <result column="p_status" property="status"/>
+            <result column="p_intake_date" property="intakeDate"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.pet.entity.PetCategory"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pet_category (name, description)
+        VALUES (#{name}, #{description})
+    </insert>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM pet_category WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.pet.entity.PetCategory">
+        UPDATE pet_category
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" parameterType="int" resultMap="CategoryResultMap">
+        SELECT id, name, description FROM pet_category WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="CategoryResultMap">
+        SELECT id, name, description FROM pet_category ORDER BY id
+    </select>
+
+    <select id="selectCategoryWithPets" parameterType="int" resultMap="CategoryWithPetsMap">
+        SELECT c.id, c.name, c.description,
+               p.id          AS p_id,
+               p.name        AS p_name,
+               p.category_id AS p_category_id,
+               p.breed       AS p_breed,
+               p.age         AS p_age,
+               p.gender      AS p_gender,
+               p.status      AS p_status,
+               p.intake_date AS p_intake_date
+        FROM pet_category c
+                 LEFT JOIN pet p ON c.id = p.category_id
+        WHERE c.id = #{id}
+    </select>
+
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pet.mapper.AdopterMapper">
+
+    <resultMap id="AdopterResultMap" type="com.pet.entity.Adopter">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="id_card" property="idCard"/>
+    </resultMap>
+
+    <!-- 多对多：领养人 <-> 宠物，通过 adoption_record 中间表关联 -->
+    <resultMap id="AdopterWithPetsMap" type="com.pet.entity.Adopter" extends="AdopterResultMap">
+        <collection property="pets" ofType="com.pet.entity.Pet">
+            <id column="p_id" property="id"/>
+            <result column="p_name" property="name"/>
+            <result column="p_category_id" property="categoryId"/>
+            <result column="p_breed" property="breed"/>
+            <result column="p_age" property="age"/>
+            <result column="p_gender" property="gender"/>
+            <result column="p_status" property="status"/>
+            <result column="p_intake_date" property="intakeDate"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.pet.entity.Adopter"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO adopter (name, gender, phone, address, id_card)
+        VALUES (#{name}, #{gender}, #{phone}, #{address}, #{idCard})
+    </insert>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM adopter WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.pet.entity.Adopter">
+        UPDATE adopter
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" parameterType="int" resultMap="AdopterResultMap">
+        SELECT id, name, gender, phone, address, id_card
+        FROM adopter WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="AdopterResultMap">
+        SELECT id, name, gender, phone, address, id_card
+        FROM adopter ORDER BY id
+    </select>
+
+    <select id="selectAdopterWithPets" parameterType="int" resultMap="AdopterWithPetsMap">
+        SELECT a.id, a.name, a.gender, a.phone, a.address, a.id_card,
+               p.id          AS p_id,
+               p.name        AS p_name,
+               p.category_id AS p_category_id,
+               p.breed       AS p_breed,
+               p.age         AS p_age,
+               p.gender      AS p_gender,
+               p.status      AS p_status,
+               p.intake_date AS p_intake_date
+        FROM adopter a
+                 LEFT JOIN adoption_record r ON a.id = r.adopter_id
+                 LEFT JOIN pet p ON r.pet_id = p.id
+        WHERE a.id = #{id}
+    </select>
+
+</mapper>

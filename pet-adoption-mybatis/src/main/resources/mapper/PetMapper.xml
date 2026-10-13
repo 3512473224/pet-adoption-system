@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pet.mapper.PetMapper">
+
+    <resultMap id="PetResultMap" type="com.pet.entity.Pet">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="breed" property="breed"/>
+        <result column="age" property="age"/>
+        <result column="gender" property="gender"/>
+        <result column="status" property="status"/>
+        <result column="intake_date" property="intakeDate"/>
+    </resultMap>
+
+    <!-- 一对一：查宠物时顺带查出它的健康档案 -->
+    <resultMap id="PetWithHealthMap" type="com.pet.entity.Pet" extends="PetResultMap">
+        <association property="health" javaType="com.pet.entity.PetHealth">
+            <id column="h_pet_id" property="petId"/>
+            <result column="vaccine_done" property="vaccineDone"/>
+            <result column="sterilized" property="sterilized"/>
+            <result column="health_note" property="healthNote"/>
+            <result column="check_date" property="checkDate"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.pet.entity.Pet"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pet (name, category_id, breed, age, gender, status, intake_date)
+        VALUES (#{name}, #{categoryId}, #{breed}, #{age}, #{gender}, #{status}, #{intakeDate})
+    </insert>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM pet WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="com.pet.entity.Pet">
+        UPDATE pet
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="breed != null">breed = #{breed},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="intakeDate != null">intake_date = #{intakeDate},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" parameterType="int" resultMap="PetResultMap">
+        SELECT id, name, category_id, breed, age, gender, status, intake_date
+        FROM pet WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="PetResultMap">
+        SELECT id, name, category_id, breed, age, gender, status, intake_date
+        FROM pet ORDER BY id
+    </select>
+
+    <!-- 多条件组合查询：名字模糊 + 品类 + 状态，动态 SQL -->
+    <select id="selectByCondition" parameterType="com.pet.entity.Pet" resultMap="PetResultMap">
+        SELECT id, name, category_id, breed, age, gender, status, intake_date
+        FROM pet
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <select id="selectPetWithHealth" parameterType="int" resultMap="PetWithHealthMap">
+        SELECT p.id, p.name, p.category_id, p.breed, p.age, p.gender, p.status, p.intake_date,
+               h.pet_id       AS h_pet_id,
+               h.vaccine_done,
+               h.sterilized,
+               h.health_note,
+               h.check_date
+        FROM pet p
+                 LEFT JOIN pet_health h ON p.id = h.pet_id
+        WHERE p.id = #{id}
+    </select>
+
+</mapper>

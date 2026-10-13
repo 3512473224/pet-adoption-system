@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pet.mapper.PetHealthMapper">
+
+    <resultMap id="HealthResultMap" type="com.pet.entity.PetHealth">
+        <id column="pet_id" property="petId"/>
+        <result column="vaccine_done" property="vaccineDone"/>
+        <result column="sterilized" property="sterilized"/>
+        <result column="health_note" property="healthNote"/>
+        <result column="check_date" property="checkDate"/>
+    </resultMap>
+
+    <!-- 健康档案表主键就是 pet_id，不使用自增 -->
+    <insert id="insert" parameterType="com.pet.entity.PetHealth">
+        INSERT INTO pet_health (pet_id, vaccine_done, sterilized, health_note, check_date)
+        VALUES (#{petId}, #{vaccineDone}, #{sterilized}, #{healthNote}, #{checkDate})
+    </insert>
+
+    <delete id="deleteByPetId" parameterType="int">
+        DELETE FROM pet_health WHERE pet_id = #{petId}
+    </delete>
+
+    <update id="update" parameterType="com.pet.entity.PetHealth">
+        UPDATE pet_health
+        <set>
+            <if test="vaccineDone != null">vaccine_done = #{vaccineDone},</if>
+            <if test="sterilized != null">sterilized = #{sterilized},</if>
+            <if test="healthNote != null">health_note = #{healthNote},</if>
+            <if test="checkDate != null">check_date = #{checkDate},</if>
+        </set>
+        WHERE pet_id = #{petId}
+    </update>
+
+    <select id="selectByPetId" parameterType="int" resultMap="HealthResultMap">
+        SELECT pet_id, vaccine_done, sterilized, health_note, check_date
+        FROM pet_health WHERE pet_id = #{petId}
+    </select>
+
+    <select id="selectAll" resultMap="HealthResultMap">
+        SELECT pet_id, vaccine_done, sterilized, health_note, check_date
+        FROM pet_health ORDER BY pet_id
+    </select>
+
+</mapper>

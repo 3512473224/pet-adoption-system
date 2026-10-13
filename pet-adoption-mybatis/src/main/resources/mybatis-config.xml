@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!-- 引入数据库连接配置文件 -->
+    <properties resource="db.properties"/>
+
+    <!-- 全局设置 -->
+    <settings>
+        <!-- 开启驼峰命名自动映射：数据表下划线字段 -> 实体类驼峰属性 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 打印 SQL 日志到控制台，方便调试 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <!-- 类型别名：实体类所在包，XML 里可直接写类名 -->
+    <typeAliases>
+        <package name="com.pet.entity"/>
+    </typeAliases>
+
+    <!-- 运行环境 -->
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!-- 注册所有 Mapper 映射文件 -->
+    <mappers>
+        <mapper resource="mapper/PetCategoryMapper.xml"/>
+        <mapper resource="mapper/PetMapper.xml"/>
+        <mapper resource="mapper/AdopterMapper.xml"/>
+        <mapper resource="mapper/AdoptionRecordMapper.xml"/>
+        <mapper resource="mapper/PetHealthMapper.xml"/>
+    </mappers>
+
+</configuration>
